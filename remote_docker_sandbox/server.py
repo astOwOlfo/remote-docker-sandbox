@@ -20,6 +20,7 @@ class DockerSandboxServer(JsonRESTServer):
     image_name: str = "bash-sandbox"
 
     def get_response(self, function: str, **kwargs) -> Any:  # type: ignore
+        assert False
         if function not in self.name_to_function:
             raise KeyError(
                 f'Invalid function "{function}". Must be one of {", ".join(self.name_to_function.keys())}'
@@ -40,7 +41,6 @@ class DockerSandboxServer(JsonRESTServer):
         return str(x + 1)
 
     def start_container(self, container_name: str) -> None:
-        assert False
         sandbox_path = Path(dirname(abspath(__file__)) + "/sandbox")
         if not sandbox_path.is_dir():
             raise FileNotFoundError(f"Sandbox directory '{sandbox_path}' not found.")
@@ -110,7 +110,6 @@ class DockerSandboxServer(JsonRESTServer):
         )
 
         print(stop_container_command)
-        assert False
 
         subprocess.Popen(
             stop_container_command,
