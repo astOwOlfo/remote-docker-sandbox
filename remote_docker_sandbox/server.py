@@ -109,6 +109,7 @@ class DockerSandboxServer(JsonRESTServer):
         )
 
         print(stop_container_command)
+        assert False
 
         subprocess.Popen(
             stop_container_command,
