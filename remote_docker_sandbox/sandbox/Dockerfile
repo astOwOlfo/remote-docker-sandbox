@@ -11,7 +11,7 @@ RUN sudo apt-get install -y python3-full python3-pip python-is-python3 python3-p
 RUN useradd -m sandboxuser
 
 # Allow sandboxuser to run apt-get without password
-RUN echo "sandboxuser ALL=(root) NOPASSWD: /usr/bin/apt-get" > /etc/sudoers.d/sandboxuser && \
+RUN echo "sandboxuser ALL=(root) NOPASSWD: /usr/bin/apt-get, /usr/bin/apt" > /etc/sudoers.d/sandboxuser && \
     chmod 0440 /etc/sudoers.d/sandboxuser
 
 # Switch to the non-root user
