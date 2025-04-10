@@ -20,7 +20,6 @@ class DockerSandboxServer(JsonRESTServer):
     image_name: str = "bash-sandbox"
 
     def get_response(self, function: str, **kwargs) -> Any:  # type: ignore
-        assert False
         if function not in self.name_to_function:
             raise KeyError(
                 f'Invalid function "{function}". Must be one of {", ".join(self.name_to_function.keys())}'
@@ -109,7 +108,7 @@ class DockerSandboxServer(JsonRESTServer):
             f"docker stop {quote(container_name)}; docker rm {quote(container_name)}"
         )
 
-        print(stop_container_command)
+        print("stop contianer command:", stop_container_command)
 
         subprocess.Popen(
             stop_container_command,
