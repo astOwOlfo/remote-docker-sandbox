@@ -16,7 +16,7 @@ class CompletedProcess:
 class RemoteDockerSandbox(JsonRESTClient):
     container_name: str
 
-    def __init__(self, server_url: str = "http://16.171.63.45:8000", init_command: str | None = None) -> None:
+    def __init__(self, server_url: str | None = None, init_command: str | None = None) -> None:
         super().__init__(server_url=server_url)
 
         self.container_name = f"docker-sandbox-{uuid4()}"

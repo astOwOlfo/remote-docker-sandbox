@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 from typing import Any
 from beartype import beartype
 
@@ -8,7 +9,15 @@ from beartype import beartype
 class JsonRESTClient:
     server_url: str
 
-    def __init__(self, server_url: str) -> None:
+    def __init__(self, server_url: str | None = None) -> None:
+        if server_url is None:
+            server_url = os.environ.get("REMOTE_DOCKER_SANDBOX_SERVER_URL")
+
+        if server_url is None:
+            raise ValueError(
+                "To initialize a JsonRESTClient, you must provide a server url, either with the server_url argument to the contructor or the REMOTE_DOCKER_SANDBOX_SERVER_URL environment variable."
+            )
+
         self.server_url = server_url
 
     @property
