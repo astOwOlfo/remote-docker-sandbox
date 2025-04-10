@@ -23,7 +23,7 @@ class JsonRESTServer(ABC):
 
             data = request.get_json()
             result, status_code = self._get_response_or_error(data)
-            print(f"{result=} {status_code=}")
+
             return jsonify(result), status_code
 
         app.run(host=self.host, debug=True, port=self.port)

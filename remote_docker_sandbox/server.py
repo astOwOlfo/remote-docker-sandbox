@@ -115,8 +115,8 @@ class DockerSandboxServer(JsonRESTServer):
 
         subprocess.Popen(
             stop_container_command,
-            # stdout=subprocess.PIPE,
-            # stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             shell=True,
         )
 
