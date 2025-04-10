@@ -16,12 +16,12 @@ class CompletedProcess:
 class RemoteDockerSandbox(JsonRESTClient):
     container_name: str
 
-    def __init__(self, server_url: str = "http://16.171.63.45:8000") -> None:
+    def __init__(self, server_url: str = "http://16.171.63.45:8000", init_command: str | None = None) -> None:
         super().__init__(server_url=server_url)
 
         self.container_name = f"docker-sandbox-{uuid4()}"
 
-        self.call_server(function="start_container", container_name=self.container_name)
+        self.call_server(function="start_container", container_name=self.container_name, init_command=init_command)
 
     def run_command(
         self, command: str, timeout_seconds: float | int = 30

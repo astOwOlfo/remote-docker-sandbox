@@ -39,7 +39,7 @@ class DockerSandboxServer(JsonRESTServer):
     def add_one(self, x: int) -> str:
         return str(x + 1)
 
-    def start_container(self, container_name: str) -> None:
+    def start_container(self, container_name: str, init_command: str | None = None) -> None:
         sandbox_path = Path(dirname(abspath(__file__)) + "/sandbox")
         if not sandbox_path.is_dir():
             raise FileNotFoundError(f"Sandbox directory '{sandbox_path}' not found.")
@@ -48,9 +48,13 @@ class DockerSandboxServer(JsonRESTServer):
             f"docker build -t {quote(self.image_name)} {quote(str(sandbox_path))}"
         )
         start_command = f"docker run -d --name {quote(container_name)} --tty {quote(self.image_name)} /bin/bash -c 'sleep infinity'"
+        if init_command is not None:
+            exec_init_command = f"docker exec {quote(container_name)} /bin/bash -c {quote(init_command)}"
+        else:
+            exec_init_command = "true"
 
         start_process = subprocess.Popen(
-            f"{build_command}; {start_command}",
+            f"{build_command} && {start_command} && {exec_init_command}",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
