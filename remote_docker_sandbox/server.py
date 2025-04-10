@@ -2,6 +2,7 @@ import subprocess
 from pathlib import Path
 from os.path import dirname, abspath
 from shlex import quote
+from argparse import ArgumentParser
 from dataclasses import dataclass, field
 from collections.abc import Callable
 from typing import Any
@@ -113,3 +114,18 @@ class DockerSandboxServer(JsonRESTServer):
             stderr=subprocess.PIPE,
             shell=True,
         )
+
+
+@beartype
+def main():
+    parser = ArgumentParser(
+        usage="`python -m remote_docker_sandbox.server` to run the server on http://0.0.0.0:8000"
+    )
+    arguments = parser.parse_args()
+
+    server = DockerSandboxServer()
+    server.serve()
+
+
+if __name__ == "__main__":
+    main()
