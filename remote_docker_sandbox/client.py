@@ -21,9 +21,7 @@ class RemoteDockerSandbox(JsonRESTClient):
 
         self.container_name = f"docker-sandbox-{uuid4()}"
 
-        self.call_server(
-            function="start_container", container_name=self.container_name
-        )
+        self.call_server(function="start_container", container_name=self.container_name)
 
     def run_command(
         self, command: str, timeout_seconds: float | int = 30

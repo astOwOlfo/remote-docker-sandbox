@@ -40,6 +40,7 @@ class DockerSandboxServer(JsonRESTServer):
         return str(x + 1)
 
     def start_container(self, container_name: str) -> None:
+        assert False
         sandbox_path = Path(dirname(abspath(__file__)) + "/sandbox")
         if not sandbox_path.is_dir():
             raise FileNotFoundError(f"Sandbox directory '{sandbox_path}' not found.")
