@@ -108,6 +108,8 @@ class DockerSandboxServer(JsonRESTServer):
             f"docker stop {quote(container_name)}; docker rm {quote(container_name)}"
         )
 
+        print(stop_container_command)
+
         subprocess.Popen(
             stop_container_command,
             # stdout=subprocess.PIPE,
