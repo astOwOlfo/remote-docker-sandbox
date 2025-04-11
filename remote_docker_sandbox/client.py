@@ -1,3 +1,4 @@
+import os
 from uuid import uuid4
 from dataclasses import dataclass
 from beartype import beartype
@@ -12,12 +13,28 @@ class CompletedProcess:
     stderr: str
 
 
+server_url_counter = 0
+
+
 @beartype
 class RemoteDockerSandbox(JsonRESTClient):
     container_name: str
 
-    def __init__(self, server_url: str | None = None, init_command: str | None = None) -> None:
-        super().__init__(server_url=server_url)
+    def __init__(self, server_urls: str | list[str] | None = None, init_command: str | None = None) -> None:
+        if isinstance(server_urls, str):
+            server_urls = [server_urls]
+
+        if server_urls is None:
+            server_urls = os.environ.get("REMOTE_DOCKER_SANDBOX_SERVER_URL")
+
+        if server_urls is None:
+            raise ValueError(
+                "To initialize a JsonRESTClient, you must provide a server url, either with the server_url argument to the contructor or the REMOTE_DOCKER_SANDBOX_SERVER_URL environment variable."
+            )
+
+        global server_url_counter
+        super().__init__(server_url=server_urls[server_url_counter])
+        server_url_counter = (server_url_counter + 1) % len(server_urls)
 
         self.container_name = f"docker-sandbox-{uuid4()}"
 
