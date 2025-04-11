@@ -26,6 +26,8 @@ class RemoteDockerSandbox(JsonRESTClient):
 
         if server_urls is None:
             server_urls = os.environ.get("REMOTE_DOCKER_SANDBOX_SERVER_URL")
+            if server_urls is not None:
+                server_urls = server_urls.split(",")
 
         if server_urls is None:
             raise ValueError(
