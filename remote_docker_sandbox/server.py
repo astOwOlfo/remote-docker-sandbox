@@ -17,7 +17,7 @@ class DockerSandboxServer(JsonRESTServer):
     starting_container_processes: dict[str, subprocess.Popen] = field(
         default_factory=lambda: {}
     )
-    image_name: str = "bash-sandbox"
+    image_name: str = "ubuntu:latest"
 
     def get_response(self, function: str, **kwargs) -> Any:  # type: ignore
         if function not in self.name_to_function:
@@ -40,13 +40,13 @@ class DockerSandboxServer(JsonRESTServer):
         return str(x + 1)
 
     def start_container(self, container_name: str, init_command: str | None = None) -> None:
-        sandbox_path = Path(dirname(abspath(__file__)) + "/sandbox")
-        if not sandbox_path.is_dir():
-            raise FileNotFoundError(f"Sandbox directory '{sandbox_path}' not found.")
+        # sandbox_path = Path(dirname(abspath(__file__)) + "/sandbox")
+        # if not sandbox_path.is_dir():
+        #     raise FileNotFoundError(f"Sandbox directory '{sandbox_path}' not found.")
 
-        build_command = (
-            f"docker build -t {quote(self.image_name)} {quote(str(sandbox_path))}"
-        )
+        # build_command = (
+        #     f"docker build -t {quote(self.image_name)} {quote(str(sandbox_path))}"
+        # )
         start_command = f"docker run -d --name {quote(container_name)} --tty {quote(self.image_name)} /bin/bash -c 'sleep infinity'"
         if init_command is not None:
             exec_init_command = f"docker exec {quote(container_name)} /bin/bash -c {quote(init_command)}"
@@ -54,7 +54,7 @@ class DockerSandboxServer(JsonRESTServer):
             exec_init_command = "true"
 
         start_process = subprocess.Popen(
-            f"{build_command} && {start_command} && {exec_init_command}",
+            f"{start_command} && {exec_init_command}",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
