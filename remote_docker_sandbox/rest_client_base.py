@@ -9,7 +9,9 @@ from beartype import beartype
 class JsonRESTClient:
     server_url: str
 
-    def __init__(self, server_url: str | None = None) -> None:
+    def __init__(
+        self, server_url: str | None = None, ignore_failed_server_calls: bool = True
+    ) -> None:
         if server_url is None:
             server_url = os.environ.get("REMOTE_DOCKER_SANDBOX_SERVER_URL")
 
@@ -19,6 +21,7 @@ class JsonRESTClient:
             )
 
         self.server_url = server_url
+        self.ignore_failed_server_calls = ignore_failed_server_calls
 
     @property
     def endpoint(self):
@@ -29,7 +32,13 @@ class JsonRESTClient:
             self.endpoint, json=kwargs, headers={"Content-Type": "application/json"}
         )
 
-        response.raise_for_status()
+        if response.status_code != 200:
+            error_message = f"Error communicating with server.\nStatus code: {response.status_code}.\nResponse json: {response.json()}"
+            if self.ignore_failed_server_calls:
+                print(error_message)
+                return
+            else:
+                raise requests.HTTPError(error_message)
 
         response = response.json()
         response = json.loads(response)

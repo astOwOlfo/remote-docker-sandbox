@@ -20,7 +20,12 @@ server_url_counter = 0
 class RemoteDockerSandbox(JsonRESTClient):
     container_name: str
 
-    def __init__(self, server_urls: str | list[str] | None = None, init_command: str | None = None) -> None:
+    def __init__(
+        self,
+        server_urls: str | list[str] | None = None,
+        init_command: str | None = None,
+        ignore_failed_server_calls: bool = True,
+    ) -> None:
         if isinstance(server_urls, str):
             server_urls = [server_urls]
 
@@ -35,12 +40,19 @@ class RemoteDockerSandbox(JsonRESTClient):
             )
 
         global server_url_counter
-        super().__init__(server_url=server_urls[server_url_counter])
+        super().__init__(
+            server_url=server_urls[server_url_counter],
+            ignore_failed_server_calls=ignore_failed_server_calls,
+        )
         server_url_counter = (server_url_counter + 1) % len(server_urls)
 
         self.container_name = f"docker-sandbox-{uuid4()}"
 
-        self.call_server(function="start_container", container_name=self.container_name, init_command=init_command)
+        self.call_server(
+            function="start_container",
+            container_name=self.container_name,
+            init_command=init_command,
+        )
 
     def run_command(
         self, command: str, timeout_seconds: float | int = 30
@@ -52,10 +64,22 @@ class RemoteDockerSandbox(JsonRESTClient):
             timeout_seconds=timeout_seconds,
         )
 
-        assert set(response.keys()) == {"returncode", "stdout", "stderr"}
-        assert isinstance(response["returncode"], int)
-        assert isinstance(response["stdout"], str)
-        assert isinstance(response["stderr"], str)
+        invalid_response = not (
+            set(response.keys()) == {"returncode", "stdout", "stderr"}
+            and isinstance(response["returncode"], int)
+            and (response["stdout"], str)
+            and isinstance(response["stderr"], str)
+        )
+        if invalid_response:
+            error_message = f"RemoteDockerSandbox.run_command: Got invalid response from server. The response json is: {response}"
+            if not self.ignore_failed_server_calls:
+                raise ValueError(error_message)
+            print(error_message)
+            return CompletedProcess(
+                returncode=1,
+                stdout="",
+                stderr="Received invalid response from the remote docker server.",
+            )
 
         return CompletedProcess(**response)
 
