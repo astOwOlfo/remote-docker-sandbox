@@ -124,7 +124,7 @@ class DockerSandboxServer(JsonRESTServer):
 @beartype
 def main():
     parser = ArgumentParser(
-        usage="`python -m remote_docker_sandbox.server` to run the server on http://0.0.0.0:8000"
+        usage="`python -m remote_docker_sandbox.server` to run the server on http://0.0.0.0:8080"
     )
     arguments = parser.parse_args()
 
