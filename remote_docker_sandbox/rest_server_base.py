@@ -11,7 +11,7 @@ from beartype import beartype
 @dataclass
 class JsonRESTServer(ABC):
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 8080
 
     def serve(self) -> None:
         app = Flask(__name__)
