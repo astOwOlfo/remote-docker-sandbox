@@ -38,7 +38,7 @@ class JsonRESTClient:
 
 # Example usage
 if __name__ == "__main__":
-    server_url = "http://16.171.63.45:8000"
+    server_url = "http://16.171.63.45:8080"
     print(f"Connecting to server at {server_url}")
     client = JsonRESTClient(server_url)
 
