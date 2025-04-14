@@ -65,7 +65,8 @@ class RemoteDockerSandbox(JsonRESTClient):
         )
 
         invalid_response = not (
-            set(response.keys()) == {"returncode", "stdout", "stderr"}
+            isinstance(response, dict)
+            and set(response.keys()) == {"returncode", "stdout", "stderr"}
             and isinstance(response["returncode"], int)
             and (response["stdout"], str)
             and isinstance(response["stderr"], str)
