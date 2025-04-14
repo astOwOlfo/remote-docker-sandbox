@@ -1,27 +1,31 @@
 FROM ubuntu:latest
 
-# Update package list and install bash (if not already installed)
+# Make sure we're running commands as root during build
+USER root
+
+# Install sudo and necessary packages including Python
 RUN apt-get update && \
-    apt-get install -y bash && \
-    apt-get install -y sudo software-properties-common
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    sudo \
+    python3-full \
+    python3-pip \
+    python-is-python3 \
+    python3-pytest && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN sudo apt-get install -y python3-full python3-pip python-is-python3 python3-pytest
+# Create a regular user
+RUN useradd -m docker-user && \
+    echo "docker-user:password" | chpasswd
 
-# Create a non-root user
-RUN useradd -m sandboxuser
+# Create a custom sudoers file that only allows apt and apt-get commands
+RUN echo 'Cmnd_Alias APT_COMMANDS = /usr/bin/apt, /usr/bin/apt-get' > /etc/sudoers.d/apt-only && \
+    echo 'docker-user ALL=(ALL) APT_COMMANDS' >> /etc/sudoers.d/apt-only && \
+    chmod 0440 /etc/sudoers.d/apt-only
 
-# Allow sandboxuser to run apt-get without password
-RUN echo "sandboxuser ALL=(root) NOPASSWD: /usr/bin/apt-get, /usr/bin/apt" > /etc/sudoers.d/sandboxuser && \
-    chmod 0440 /etc/sudoers.d/sandboxuser
+# Switch to the regular user
+USER docker-user
+WORKDIR /home/docker-user
 
-# Switch to the non-root user
-USER sandboxuser
-
-# Set the working directory
-WORKDIR /home/sandboxuser
-
-# Set default shell to bash
-SHELL ["/bin/bash", "-c"]
-
-# Start a shell by default
+# Default command
 CMD ["/bin/bash"]

@@ -1,4 +1,5 @@
 import requests
+import traceback
 import json
 import os
 from typing import Any
@@ -28,9 +29,16 @@ class JsonRESTClient:
         return f"{self.server_url}/process"
 
     def call_server(self, **kwargs) -> Any:
-        response = requests.post(
-            self.endpoint, json=kwargs, headers={"Content-Type": "application/json"}
-        )
+        try:
+            response = requests.post(
+                self.endpoint, json=kwargs, headers={"Content-Type": "application/json"}
+            )
+        except requests.HTTPError as e:
+            if not self.ignore_failed_server_calls:
+                raise e
+            error_message: f"Error communicating with server: {e} {traceback.format_exc()}"
+            print(error_message)
+            return {"error": error_message}
 
         if response.status_code != 200:
             error_message = f"Error communicating with server.\nStatus code: {response.status_code}.\nResponse json: {response.json()}"
