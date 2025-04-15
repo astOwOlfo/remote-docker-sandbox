@@ -8,4 +8,5 @@ dependencies = [
     "beartype>=0.20.2",
     "flask>=3.1.0",
     "plotly>=6.0.1",
+    "requests>=2.32.3",
 ]
