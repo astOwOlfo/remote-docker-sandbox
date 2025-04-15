@@ -44,7 +44,7 @@ class JsonRESTServer(ABC):
                     {"start": timestamp.start, "end": timestamp.end}
                     for timestamp in self._call_timestamps
                 ]
-            return response, 400
+            return response, 200
 
         app.run(host=self.host, debug=True, port=self.port)
 
