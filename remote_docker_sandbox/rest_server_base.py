@@ -1,4 +1,6 @@
+import threading
 from flask import Flask, request, jsonify
+from time import perf_counter
 import json
 import traceback
 from abc import ABC, abstractmethod
@@ -8,10 +10,19 @@ from beartype import beartype
 
 
 @beartype
+@dataclass(frozen=True)
+class Timestamp:
+    start: float
+    end: float
+
+
+@beartype
 @dataclass
 class JsonRESTServer(ABC):
     host: str = "0.0.0.0"
     port: int = 8080
+    _call_timestamps: list[Timestamp] = []
+    _call_timestamps_lock: threading.Lock = threading.Lock()
 
     def serve(self) -> None:
         app = Flask(__name__)
@@ -25,16 +36,30 @@ class JsonRESTServer(ABC):
             result, status_code = self._get_response_or_error(data)
 
             return jsonify(result), status_code
+        
+        @app.route("/get_call_timestamps", methods=["GET"])
+        def get_call_timestamps():
+            with self._call_timestamps_lock:
+                response = [
+                    {"start": timestamp.start, "end": timestamp.end}
+                    for timestamp in self._call_timestamps
+                ]
+            return response, 400
 
         app.run(host=self.host, debug=True, port=self.port)
 
     def _get_response_or_error(self, arguments: Any) -> tuple[Any, int]:
+        start_time = perf_counter()
         try:
             result = self.get_response(**arguments)
         except Exception as e:
-            return {
+            result = {
                 "error": f"Uncaught exception:\n\n{e}\n{traceback.format_exc()}"
             }, 400
+        end_time = perf_counter()
+
+        with self._call_timestamps_lock:
+            self._call_timestamps.append(Timestamp(start=start_time, end=end_time))
 
         try:
             return json.dumps(result), 200
