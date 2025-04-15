@@ -1,4 +1,4 @@
-from threading import Lock
+# from threading import Lock
 from flask import Flask, request, jsonify
 from time import perf_counter
 import json
@@ -21,8 +21,8 @@ class Timestamp:
 class JsonRESTServer(ABC):
     host: str = "0.0.0.0"
     port: int = 8080
-    _call_timestamps: list[Timestamp] = field(default_factory=lambda: [])
-    _call_timestamps_lock: Any = field(default_factory=lambda: Lock())
+    # _call_timestamps: list[Timestamp] = field(default_factory=lambda: [])
+    # _call_timestamps_lock: Any = field(default_factory=lambda: Lock())
 
     def serve(self) -> None:
         app = Flask(__name__)
@@ -37,19 +37,19 @@ class JsonRESTServer(ABC):
 
             return jsonify(result), status_code
 
-        @app.route("/get_call_timestamps", methods=["GET"])
-        def get_call_timestamps():
-            with self._call_timestamps_lock:
-                response = [
-                    {"start": timestamp.start, "end": timestamp.end}
-                    for timestamp in self._call_timestamps
-                ]
-            return response, 200
+        # @app.route("/get_call_timestamps", methods=["GET"])
+        # def get_call_timestamps():
+        #     with self._call_timestamps_lock:
+        #         response = [
+        #             {"start": timestamp.start, "end": timestamp.end}
+        #             for timestamp in self._call_timestamps
+        #         ]
+        #     return response, 200
 
         app.run(host=self.host, debug=True, port=self.port)
 
     def _get_response_or_error(self, arguments: Any) -> tuple[Any, int]:
-        start_time = perf_counter()
+        # start_time = perf_counter()
         try:
             result = self.get_response(**arguments)
         except Exception as e:
@@ -57,10 +57,10 @@ class JsonRESTServer(ABC):
                 {"error": f"Uncaught exception:\n\n{e}\n{traceback.format_exc()}"},
                 400,
             )
-        end_time = perf_counter()
+        # end_time = perf_counter()
 
-        with self._call_timestamps_lock:
-            self._call_timestamps.append(Timestamp(start=start_time, end=end_time))
+        # with self._call_timestamps_lock:
+        #     self._call_timestamps.append(Timestamp(start=start_time, end=end_time))
 
         try:
             return json.dumps(result), 200
