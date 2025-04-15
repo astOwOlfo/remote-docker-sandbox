@@ -145,7 +145,7 @@ class DockerSandboxServer(JsonRESTServer):
                 self.run_command(
                     container_name=container_name,
                     command=command,
-                    timeout_seconds=per_command_timeout_seconds,
+                    timeout_seconds=min(per_command_timeout_seconds, remaining_time),
                 )
             )
             end_time = perf_counter()
