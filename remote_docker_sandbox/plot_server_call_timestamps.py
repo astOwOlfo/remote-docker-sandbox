@@ -23,7 +23,27 @@ def plot_call_timestamps(server_urls: Optional[List[str]] = None, save_filename:
         server_urls = [url.strip() for url in env_urls.split(",")]
     
     # Define colors for different servers (will cycle if more servers than colors)
-    colors = ['blue', 'red', 'green', 'purple', 'orange', 'brown', 'pink', 'gray', 'olive', 'cyan']
+    colors = [
+        # Standard colors
+        'red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown',
+        'black', 'gray', 'cyan', 'magenta', 'lime', 'teal', 'indigo', 'violet',
+        
+        # Light variations
+        'lightblue', 'lightgreen', 'lightcoral', 'lightsalmon', 'lightseagreen',
+        'lightskyblue', 'lightsteelblue', 'lightpink', 'lightyellow', 'lightgray',
+        
+        # Dark variations
+        'darkblue', 'darkgreen', 'darkcyan', 'darkred', 'darkmagenta', 'darkorange',
+        'darkviolet', 'darkslategray', 'darkkhaki', 'darkturquoise',
+        
+        # Other named colors
+        'chocolate', 'firebrick', 'forestgreen', 'gold', 'goldenrod', 'hotpink',
+        'indianred', 'lavender', 'lawngreen', 'maroon', 'mediumaquamarine',
+        'mediumseagreen', 'mediumslateblue', 'navy', 'olive', 'olivedrab',
+        'orangered', 'orchid', 'plum', 'rosybrown', 'royalblue', 'salmon',
+        'seagreen', 'sienna', 'silver', 'skyblue', 'slateblue', 'springgreen',
+        'steelblue', 'tomato', 'turquoise', 'wheat', 'yellowgreen'
+    ]
     
     # Create subplots (one row for each server)
     fig = make_subplots(rows=len(server_urls), shared_xaxes=True, 
