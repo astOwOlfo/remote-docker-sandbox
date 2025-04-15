@@ -3,16 +3,18 @@ from flask import Flask, request, jsonify
 from time import perf_counter
 import traceback
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import Any
 from beartype import beartype
 
 
 @beartype
 @dataclass(frozen=True)
-class Timestamp:
+class CallTimestamp:
     start: float
     end: float
+    arguments: Any
+    result: Any
 
 
 @beartype
@@ -20,7 +22,7 @@ class Timestamp:
 class JsonRESTServer(ABC):
     host: str = "0.0.0.0"
     port: int = 8080
-    _call_timestamps: list[Timestamp] = field(default_factory=lambda: [])
+    _call_timestamps: list[CallTimestamp] = field(default_factory=lambda: [])
     _call_timestamps_lock: Any = field(default_factory=lambda: Lock())
 
     def serve(self) -> None:
@@ -39,10 +41,7 @@ class JsonRESTServer(ABC):
         @app.route("/get_call_timestamps", methods=["GET"])
         def get_call_timestamps():
             with self._call_timestamps_lock:
-                response = [
-                    {"start": timestamp.start, "end": timestamp.end}
-                    for timestamp in self._call_timestamps
-                ]
+                response = [asdict(timestamp) for timestamp in self._call_timestamps]
             return response, 200
 
         app.run(host=self.host, debug=True, port=self.port)
@@ -59,7 +58,11 @@ class JsonRESTServer(ABC):
         end_time = perf_counter()
 
         with self._call_timestamps_lock:
-            self._call_timestamps.append(Timestamp(start=start_time, end=end_time))
+            self._call_timestamps.append(
+                CallTimestamp(
+                    start=start_time, end=end_time, arguments=arguments, result=result
+                )
+            )
 
         try:
             return result, 200
