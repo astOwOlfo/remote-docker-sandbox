@@ -84,13 +84,5 @@ def plot_call_timestamps(server_urls: Optional[List[str]] = None, save_filename:
         fig.show()
 
 
-# Example usage:
 if __name__ == "__main__":
-    # Example 1: Use environment variable for server URLs
-    # os.environ["REMOTE_DOCKER_SANDBOX_SERVER_URL"] = "http://3.91.192.93:8080,http://another-server:8080"
-    # plot_call_timestamps()
-    
-    # Example 2: Explicitly provide server URLs
-    plot_call_timestamps(
-        server_urls=["http://3.91.192.93:8080"],
-    )
+    plot_call_timestamps()
