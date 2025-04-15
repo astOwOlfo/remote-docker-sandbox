@@ -36,7 +36,7 @@ class JsonRESTServer(ABC):
             result, status_code = self._get_response_or_error(data)
 
             return jsonify(result), status_code
-        
+
         @app.route("/get_call_timestamps", methods=["GET"])
         def get_call_timestamps():
             with self._call_timestamps_lock:
@@ -53,9 +53,10 @@ class JsonRESTServer(ABC):
         try:
             result = self.get_response(**arguments)
         except Exception as e:
-            result = {
-                "error": f"Uncaught exception:\n\n{e}\n{traceback.format_exc()}"
-            }, 400
+            result = (
+                {"error": f"Uncaught exception:\n\n{e}\n{traceback.format_exc()}"},
+                400,
+            )
         end_time = perf_counter()
 
         with self._call_timestamps_lock:
