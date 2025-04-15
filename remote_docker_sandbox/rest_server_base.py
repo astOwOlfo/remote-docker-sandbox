@@ -63,7 +63,7 @@ class JsonRESTServer(ABC):
         #     self._call_timestamps.append(Timestamp(start=start_time, end=end_time))
 
         try:
-            return json.dumps(result), 200
+            return result, 200
         except Exception:
             return {"error": f"Unable to convert response to json. {str(result)=}"}, 400
 

@@ -88,10 +88,11 @@ class RemoteDockerSandbox(JsonRESTClient):
 
     def upload_file(self, filename: str, content: str) -> CompletedProcess:
         return self.run_command(
-            self.upload_file_command(filename=filename, content=content)
+            RemoteDockerSandbox.upload_file_command(filename=filename, content=content)
         )
 
-    def upload_file_command(self, filename: str, content: str) -> str:
+    @staticmethod
+    def upload_file_command(filename: str, content: str) -> str:
         encoded_data = base64.b64encode(content.encode()).decode()
         return f"echo {encoded_data} | base64 -d > {quote(filename)}"
 
