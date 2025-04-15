@@ -1,5 +1,7 @@
 import os
 from uuid import uuid4
+from shlex import quote
+import base64
 from dataclasses import dataclass
 from beartype import beartype
 
@@ -83,6 +85,15 @@ class RemoteDockerSandbox(JsonRESTClient):
             )
 
         return CompletedProcess(**response)
+
+    def upload_file(self, filename: str, content: str) -> CompletedProcess:
+        return self.run_command(
+            self.upload_file_command(filename=filename, content=content)
+        )
+
+    def upload_file_command(self, filename: str, content: str) -> str:
+        encoded_data = base64.b64encode(content.encode()).decode()
+        return f"echo {encoded_data} | base64 -d > {quote(filename)}"
 
     def cleanup(self) -> None:
         self.call_server(function="stop_container", container_name=self.container_name)
