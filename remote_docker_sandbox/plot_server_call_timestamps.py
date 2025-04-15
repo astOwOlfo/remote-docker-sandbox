@@ -87,7 +87,7 @@ def plot_call_timestamps(server_urls: Optional[List[str]] = None, save_filename:
     fig.update_layout(
         title="Call Timestamps by Server",
         xaxis_title="Time (seconds)",
-        height=200 * len(server_urls),  # Adjust height based on number of servers
+        height=500 * len(server_urls),  # Adjust height based on number of servers
         margin=dict(l=50, r=20, t=50, b=50),
     )
     
