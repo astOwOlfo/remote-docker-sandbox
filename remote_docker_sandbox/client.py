@@ -57,7 +57,7 @@ class RemoteDockerSandbox(JsonRESTClient):
         )
 
     def run_command(
-        self, command: str, timeout_seconds: float | int = 1
+        self, command: str, timeout_seconds: float | int = 30
     ) -> CompletedProcess:
         response = self.call_server(
             function="run_command",

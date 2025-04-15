@@ -103,5 +103,10 @@ def plot_call_timestamps(server_urls: Optional[List[str]] = None, save_filename:
         fig.show()
 
 
-if __name__ == "__main__":
+@beartype
+def main() -> None:
     plot_call_timestamps()
+
+
+if __name__ == "__main__":
+    main()
