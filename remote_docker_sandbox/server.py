@@ -5,6 +5,7 @@ from shlex import quote
 from argparse import ArgumentParser
 from dataclasses import dataclass, field
 from collections.abc import Callable
+from time import perf_counter
 from typing import Any
 from beartype import beartype
 
@@ -32,14 +33,17 @@ class DockerSandboxServer(JsonRESTServer):
         return {
             "add_one": self.add_one,
             "start_container": self.start_container,
-            "run_command": self.run_command,
             "stop_container": self.stop_container,
+            "run_command": self.run_command,
+            "run_commands_sequentially": self.run_commands_sequentially,
         }
 
     def add_one(self, x: int) -> str:
         return str(x + 1)
 
-    def start_container(self, container_name: str, init_command: str | None = None) -> None:
+    def start_container(
+        self, container_name: str, init_command: str | None = None
+    ) -> None:
         sandbox_path = Path(dirname(abspath(__file__)) + "/sandbox")
         if not sandbox_path.is_dir():
             raise FileNotFoundError(f"Sandbox directory '{sandbox_path}' not found.")
@@ -74,6 +78,20 @@ class DockerSandboxServer(JsonRESTServer):
                 f"Error starting sandbox:\nstart process exit code: {start_process.returncode} \n\nstart process stdout: {stdout}\n\nstart process stderr {stderr}"
             )
 
+    def stop_container(self, container_name: str) -> None:
+        self._wait_until_started(container_name)
+
+        stop_container_command = (
+            f"docker stop {quote(container_name)}; docker rm {quote(container_name)}"
+        )
+
+        subprocess.Popen(
+            stop_container_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+        )
+
     def run_command(
         self, container_name: str, command: str, timeout_seconds: int | float
     ) -> dict:
@@ -98,7 +116,7 @@ class DockerSandboxServer(JsonRESTServer):
                 errors="replace",
             )
         except subprocess.TimeoutExpired:
-            return {"returncode": 1, "stdout": "", "stderr": ""}
+            return {"returncode": 1, "stdout": "", "stderr": "timed out"}
 
         return {
             "returncode": output.returncode,
@@ -106,19 +124,34 @@ class DockerSandboxServer(JsonRESTServer):
             "stderr": output.stderr,
         }
 
-    def stop_container(self, container_name: str) -> None:
+    def run_commands_sequentially(
+        self,
+        container_name: str,
+        commands: list[str],
+        total_timeout_seconds: float | int,
+        per_command_timeout_seconds: float | int,
+    ) -> list[dict]:
         self._wait_until_started(container_name)
 
-        stop_container_command = (
-            f"docker stop {quote(container_name)}; docker rm {quote(container_name)}"
-        )
+        responses: list[dict] = []
+        remaining_time = total_timeout_seconds
+        for command in commands:
+            if remaining_time <= 0:
+                responses.append({"returncode": 1, "stdout": "", "stderr": "timed out"})
+                continue
 
-        subprocess.Popen(
-            stop_container_command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=True,
-        )
+            start_time = perf_counter()
+            responses.append(
+                self.run_command(
+                    container_name=container_name,
+                    command=command,
+                    timeout_seconds=per_command_timeout_seconds,
+                )
+            )
+            end_time = perf_counter()
+            remaining_time -= end_time - start_time
+
+        return responses
 
 
 @beartype

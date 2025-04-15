@@ -86,6 +86,46 @@ class RemoteDockerSandbox(JsonRESTClient):
 
         return CompletedProcess(**response)
 
+    def run_commands_sequentially(
+        self,
+        commands: list[str],
+        total_timeout_seconds: float | int = 30,
+        per_command_timeout_seconds: float | int = 25,
+    ) -> list[CompletedProcess]:
+        response = self.call_server(
+            function="run_commands_sequentially",
+            contianer_name=self.container_name,
+            total_timeout_seconds=total_timeout_seconds,
+            per_command_timeout_seconds=per_command_timeout_seconds,
+        )
+
+        invalid_response = not (
+            isinstance(response, list)
+            and all(
+                isinstance(r, dict)
+                and set(r.keys()) == {"returncode", "stdout", "stderr"}
+                and isinstance(r["returncode"], int)
+                and (r["stdout"], str)
+                and isinstance(r["stderr"], str)
+                for r in response
+            )
+        )
+        if invalid_response:
+            error_message = f"RemoteDockerSandbox.run_commands_sequentially: Got invalid response from server. The response json is: {response}"
+            if not self.ignore_failed_server_calls:
+                raise ValueError(error_message)
+            print(error_message)
+            return [
+                CompletedProcess(
+                    returncode=1,
+                    stdout="",
+                    stderr="Received invalid response from the remote docker server.",
+                )
+                for _ in commands
+            ]
+
+        return [CompletedProcess(**r) for r in response]
+
     def upload_file(self, filename: str, content: str) -> CompletedProcess:
         return self.run_command(
             RemoteDockerSandbox.upload_file_command(filename=filename, content=content)
