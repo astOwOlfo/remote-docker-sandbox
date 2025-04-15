@@ -1,10 +1,10 @@
-import threading
+from threading import Lock
 from flask import Flask, request, jsonify
 from time import perf_counter
 import json
 import traceback
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 from beartype import beartype
 
@@ -21,8 +21,8 @@ class Timestamp:
 class JsonRESTServer(ABC):
     host: str = "0.0.0.0"
     port: int = 8080
-    _call_timestamps: list[Timestamp] = []
-    _call_timestamps_lock: threading.Lock = threading.Lock()
+    _call_timestamps: list[Timestamp] = field(default_factory=lambda: [])
+    _call_timestamps_lock: Lock = field(default_factory=lambda: Lock())
 
     def serve(self) -> None:
         app = Flask(__name__)
