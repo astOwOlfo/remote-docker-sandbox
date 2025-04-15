@@ -2,9 +2,8 @@ import os
 import requests
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import numpy as np
 from beartype import beartype
-from typing import List, Optional, Union
+from typing import List, Optional
 
 @beartype
 def plot_call_timestamps(server_urls: Optional[List[str]] = None, save_filename: Optional[str] = None) -> None:
