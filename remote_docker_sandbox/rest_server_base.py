@@ -22,7 +22,7 @@ class JsonRESTServer(ABC):
     host: str = "0.0.0.0"
     port: int = 8080
     _call_timestamps: list[Timestamp] = field(default_factory=lambda: [])
-    _call_timestamps_lock: "Lock" = field(default_factory=lambda: Lock())
+    _call_timestamps_lock: Any = field(default_factory=lambda: Lock())
 
     def serve(self) -> None:
         app = Flask(__name__)
