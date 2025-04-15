@@ -94,7 +94,7 @@ class RemoteDockerSandbox(JsonRESTClient):
     ) -> list[CompletedProcess]:
         response = self.call_server(
             function="run_commands_sequentially",
-            contianer_name=self.container_name,
+            container_name=self.container_name,
             total_timeout_seconds=total_timeout_seconds,
             per_command_timeout_seconds=per_command_timeout_seconds,
         )
