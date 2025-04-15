@@ -49,7 +49,8 @@ class JsonRESTClient:
                 raise requests.HTTPError(error_message)
 
         response = response.json()
-        response = json.loads(response)
+        if response is not None:
+            response = json.loads(response)
         return response
 
 
