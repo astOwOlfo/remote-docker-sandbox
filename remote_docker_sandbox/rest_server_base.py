@@ -10,11 +10,9 @@ from beartype import beartype
 
 @beartype
 @dataclass(frozen=True)
-class CallTimestamp:
+class Timestamp:
     start: float
     end: float
-    arguments: Any
-    result: Any
 
 
 @beartype
@@ -22,7 +20,7 @@ class CallTimestamp:
 class JsonRESTServer(ABC):
     host: str = "0.0.0.0"
     port: int = 8080
-    _call_timestamps: list[CallTimestamp] = field(default_factory=lambda: [])
+    _call_timestamps: list[Timestamp] = field(default_factory=lambda: [])
     _call_timestamps_lock: Any = field(default_factory=lambda: Lock())
 
     def serve(self) -> None:
@@ -58,11 +56,7 @@ class JsonRESTServer(ABC):
         end_time = perf_counter()
 
         with self._call_timestamps_lock:
-            self._call_timestamps.append(
-                CallTimestamp(
-                    start=start_time, end=end_time, arguments=arguments, result=result
-                )
-            )
+            self._call_timestamps.append(Timestamp(start=start_time, end=end_time))
 
         try:
             return result, 200
