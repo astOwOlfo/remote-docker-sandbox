@@ -31,12 +31,17 @@ class JsonRESTClient:
     def call_server(self, **kwargs) -> Any:
         try:
             response = requests.post(
-                self.endpoint, json=kwargs, headers={"Content-Type": "application/json"}
+                self.endpoint,
+                json=kwargs,
+                headers={"Content-Type": "application/json"},
+                timeout=600, # we want this big enough to virtually never happen, but we want this because otherwise the training script can freeze forever
             )
         except Exception as e:
             if not self.ignore_failed_server_calls:
                 raise e
-            error_message = f"Error communicating with server: {e} {traceback.format_exc()}"
+            error_message = (
+                f"Error communicating with server: {e} {traceback.format_exc()}"
+            )
             print(error_message)
             return {"error": error_message}
 
