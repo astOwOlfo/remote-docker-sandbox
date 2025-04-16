@@ -17,8 +17,11 @@ class CompletedProcess:
 
 server_url_counter = 0
 
+blacklisted_server_urls = []
+
 
 MAX_CREATE_RETRIES = 64
+
 
 @beartype
 class RemoteDockerSandbox(JsonRESTClient):
@@ -44,29 +47,37 @@ class RemoteDockerSandbox(JsonRESTClient):
             )
 
         global server_url_counter
+        global blacklisted_server_urls
+
+        assert set(server_urls) != set(blacklisted_server_urls), (
+            "All server URLs are blacklisted."
+        )
+
+        while server_urls[server_url_counter] in blacklisted_server_urls:
+            server_url_counter = (server_url_counter + 1) % len(server_urls)
+
         super().__init__(
             server_url=server_urls[server_url_counter],
             ignore_failed_server_calls=ignore_failed_server_calls,
         )
         server_url_counter = (server_url_counter + 1) % len(server_urls)
 
-        for _ in range(MAX_CREATE_RETRIES):
-            self.container_name = f"docker-sandbox-{uuid4()}"
+        self.container_name = f"docker-sandbox-{uuid4()}"
 
-            start_response = self.call_server(
-                function="start_container",
-                container_name=self.container_name,
-                init_command=init_command,
+        start_response = self.call_server(
+            function="start_container",
+            container_name=self.container_name,
+            init_command=init_command,
+        )
+
+        error = isinstance(start_response, dict) and set(start_response.keys()) == {
+            "error"
+        }
+        if error:
+            print(
+                f"ERROR CREATING SANDBOX WITH SERVER URL {self.server_url}!! THIS SERVER WILL NEVER BE USED AGAIN!!"
             )
-
-            error = isinstance(start_response, dict) and set(start_response.keys()) == {"error"}
-            if not error:
-                break
-
-            print(f"ERROR CREATING SANDBOX WITH SERVER URL {self.server_url}!! TRYING TO CREATE ONE WITH THE NEXT SERVER URL")
-
-            self.server_url = server_urls[server_url_counter]
-            server_url_counter = (server_url_counter + 1) % len(server_urls)
+            blacklisted_server_urls.append(self.server_url)
 
     def run_command(
         self, command: str, timeout_seconds: float | int = 1
