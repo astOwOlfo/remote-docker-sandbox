@@ -42,7 +42,7 @@ class DockerSandboxServer(JsonRESTServer):
         return str(x + 1)
 
     def start_container(
-        self, container_name: str, init_command: str | None = None
+        self, container_name: str, init_command: str | None, memory_gb: int | float, cpus: int
     ) -> None:
         sandbox_path = Path(dirname(abspath(__file__)) + "/sandbox")
         if not sandbox_path.is_dir():
@@ -51,7 +51,7 @@ class DockerSandboxServer(JsonRESTServer):
         build_command = (
             f"docker build -t {quote(self.image_name)} {quote(str(sandbox_path))}"
         )
-        start_command = f"docker run -d --name {quote(container_name)} --tty {quote(self.image_name)} /bin/bash -c 'sleep infinity'"
+        start_command = f"docker run -d --name {quote(container_name)} --memory {memory_gb}gb --cpus {cpus} --tty {quote(self.image_name)} /bin/bash -c 'sleep infinity'"
         if init_command is not None:
             exec_init_command = f"docker exec {quote(container_name)} /bin/bash -c {quote(init_command)}"
         else:

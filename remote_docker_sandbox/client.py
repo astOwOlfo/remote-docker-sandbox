@@ -32,6 +32,8 @@ class RemoteDockerSandbox(JsonRESTClient):
         server_urls: str | list[str] | None = None,
         init_command: str | None = None,
         ignore_failed_server_calls: bool = True,
+        memory_gb: int | float = 1,
+        cpus: int = 1,
     ) -> None:
         if isinstance(server_urls, str):
             server_urls = [server_urls]
@@ -68,6 +70,8 @@ class RemoteDockerSandbox(JsonRESTClient):
             function="start_container",
             container_name=self.container_name,
             init_command=init_command,
+            memory_gb=memory_gb,
+            cpus=cpus,
         )
 
         error = isinstance(start_response, dict) and set(start_response.keys()) == {
