@@ -44,7 +44,7 @@ class JsonRESTClient:
             error_message = f"Error communicating with server.\nStatus code: {response.status_code}.\nResponse json: {response.json()}"
             if self.ignore_failed_server_calls:
                 print(error_message)
-                return
+                return {"error": error_message}
             else:
                 raise requests.HTTPError(error_message)
 
