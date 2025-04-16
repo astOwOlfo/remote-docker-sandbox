@@ -167,13 +167,8 @@ class RemoteDockerSandbox(JsonRESTClient):
     def cleanup(self) -> None:
         self.call_server(function="stop_container", container_name=self.container_name)
 
-
-@beartype
-def main() -> None:
-    sandbox = RemoteDockerSandbox()
-    print(sandbox.run_command("echo hi; ls; pwd"))
-    sandbox.cleanup()
-
-
-if __name__ == "__main__":
-    main()
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exception_type, exception_value, traceback) -> None:
+        self.cleanup()
