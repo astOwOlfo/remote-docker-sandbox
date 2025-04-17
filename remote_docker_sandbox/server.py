@@ -161,7 +161,7 @@ class DockerSandboxServer(JsonRESTServer):
 @beartype
 def main():
     parser = ArgumentParser(
-        description="Run a docker server. You can the use the docker client on by givin a http://ip:port/process base url."
+        description="Run a docker server. You can the use the docker client on by givin a http://your_ip:port base url."
     )
     parser.add_argument("--host", type=str, default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8080)
