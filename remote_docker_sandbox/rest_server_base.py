@@ -18,7 +18,7 @@ class Timestamp:
 @beartype
 @dataclass
 class JsonRESTServer(ABC):
-    host: str = "0.0.0.0"
+    host: str = "0.0.0.0" # Use host='0.0.0.0' to make the server accessible from other machines
     port: int = 8080
     _call_timestamps: list[Timestamp] = field(default_factory=lambda: [])
     _call_timestamps_lock: Any = field(default_factory=lambda: Lock())
@@ -75,6 +75,5 @@ class DummyJsonRESTServer(JsonRESTServer):
 
 
 if __name__ == "__main__":
-    # Use host='0.0.0.0' to make the server accessible from other machines
     server = DummyJsonRESTServer()
     server.serve()

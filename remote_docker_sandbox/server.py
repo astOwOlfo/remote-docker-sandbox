@@ -42,7 +42,11 @@ class DockerSandboxServer(JsonRESTServer):
         return str(x + 1)
 
     def start_container(
-        self, container_name: str, init_command: str | None, memory_gb: int | float, cpus: int
+        self,
+        container_name: str,
+        init_command: str | None,
+        memory_gb: int | float,
+        cpus: int,
     ) -> None:
         sandbox_path = Path(dirname(abspath(__file__)) + "/sandbox")
         if not sandbox_path.is_dir():
@@ -157,11 +161,13 @@ class DockerSandboxServer(JsonRESTServer):
 @beartype
 def main():
     parser = ArgumentParser(
-        usage="`python -m remote_docker_sandbox.server` to run the server on http://0.0.0.0:8080"
+        description="Run a docker server. You can the use the docker client on by givin a http://ip:port/process base url."
     )
+    parser.add_argument("--host", type=str, default="0.0.0.0")
+    parser.add_argument("--port", type=int, default=8080)
     arguments = parser.parse_args()
 
-    server = DockerSandboxServer()
+    server = DockerSandboxServer(host=arguments.host, port=arguments.port)
     server.serve()
 
 
